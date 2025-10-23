@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bike Expense Tracker &ndash; Login / Signup</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="assets/css/index.css">
+
+
+</head>
+<body>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-6">
+      <div class="card p-4 p-lg-5 mt-5 border-0">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#6366f1"></rect><path d="M7 14h10M7 10h10" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <div class="h5 mb-0 auth-brand">Bike Expense Tracker</div>
+              <div class="small-muted auth-subtitle mt-1">Track fuel, service & mods &ndash; offline & mobile friendly</div>
+            </div>
+          </div>
+          <button type="button" class="theme-toggle" id="themeToggle" data-theme-toggle aria-pressed="false">
+            <span class="theme-icon" data-theme-icon aria-hidden="true">🌙</span>
+            <span class="theme-toggle-text" data-theme-text>Dark mode</span>
+          </button>
+        </div>
+
+        <ul class="nav nav-tabs mb-4" id="authTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button">Login</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="signup-tab" data-bs-toggle="tab" data-bs-target="#signup" type="button">Signup</button>
+          </li>
+        </ul>
+
+        <div class="tab-content pt-2">
+          <!-- LOGIN -->
+          <div class="tab-pane fade show active" id="login">
+            <form id="loginForm" class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Username</label>
+                <input id="loginUsername" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Password</label>
+                <input id="loginPassword" type="password" class="form-control" required>
+              </div>
+              <div class="col-12 d-flex justify-content-between align-items-center">
+                <div>
+                  <a href="#" id="openForgot">Forgot password?</a>
+                </div>
+                <div>
+                  <button class="btn btn-outline-secondary me-2" type="reset">Clear</button>
+                  <button class="btn btn-primary" type="submit">Login</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- SIGNUP -->
+          <div class="tab-pane fade" id="signup">
+            <form id="signupForm" class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Full name</label>
+                <input id="signupFull" class="form-control" placeholder="Your name" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Username</label>
+                <input id="signupUser" class="form-control" placeholder="unique username" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Password</label>
+                <input id="signupPass" type="password" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Recovery PIN (4 digits)</label>
+                <input id="signupPin" class="form-control" maxlength="4" placeholder="e.g. 2381" required pattern="\d{4}">
+                <div class="form-text small-muted">Used only for local password reset (stored hashed)</div>
+              </div>
+
+              <div class="col-12 d-flex justify-content-end">
+                <button class="btn btn-outline-secondary me-2" type="reset">Reset</button>
+                <button class="btn btn-success" type="submit">Create account</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <hr>
+        <div class="text-center small-muted mb-2">Free, offline-first app &bull; Host on GitHub Pages</div>
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+        <footer class="app-footer">
+          <div class="app-footer__tip">Tip: Use the same browser or device to preserve your data.</div>
+          <div class="app-footer__credit">Design &amp; Developed by <a href="https://lucifer01430.github.io/Portfolio" target="_blank" rel="noopener">Harsh Pandey</a></div>
+        </footer>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal fade" id="forgotModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="forgotForm" class="needs-validation" novalidate>
+        <div class="modal-header">
+          <h5 class="modal-title">Forgot Password &ndash; Recovery PIN</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small-muted">Enter your username and your 4-digit Recovery PIN to set a new password.</p>
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input id="forgotUser" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Recovery PIN (4 digits)</label>
+            <input id="forgotPin" class="form-control" maxlength="4" required pattern="\d{4}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">New Password</label>
+            <input id="forgotNewPass" type="password" class="form-control" required>
+          </div>
+          <div class="alert d-none" id="forgotMsg"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-primary" type="submit">Reset Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap 5 JS bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-sha256@0.11.0/build/sha256.min.js"></script>
+<script src="assets/js/theme.js"></script>
+
+<script src="assets/js/index.js"></script>
+</body>
+</html>
