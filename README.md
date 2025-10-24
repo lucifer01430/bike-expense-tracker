@@ -48,8 +48,8 @@ This project delivers a **privacy-first, client-side experience** that enables r
 ---
 
 ## 🧩 Project Structure
+```
 
-`
 📁 Fuel-tracker/
 ├── dashboard.html          # Authenticated dashboard UI
 ├── index.html              # Landing / login / signup screen
@@ -64,8 +64,8 @@ This project delivers a **privacy-first, client-side experience** that enables r
 │   └── seo/
 │       └── bike-expense-tracker-og.png  # Social preview asset (add your own)
 └── README.md               # Project documentation (you are here)
-`
 
+```
 ---
 
 ## 🚀 How to Run Locally
@@ -83,7 +83,7 @@ cd bike-expense-tracker
 px serve
 
 ### 3️⃣ Visit the dashboard
-Open http://localhost:8000/index.html in your browser, create a profile, and explore the dashboard. Install it as a PWA from the browser prompt for a native-like experience.
+Open http://localhost:8000/index.php in your browser, create a profile, and explore the dashboard. Install it as a PWA from the browser prompt for a native-like experience.
 
 ---
 
