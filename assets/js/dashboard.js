@@ -419,11 +419,12 @@ function renderCalendar() {
   document.getElementById("calTitle").innerText = `${monthName} ${y}`;
 
   const entries = getMonthEntries(y, m);
-  const byDay = {};
+  const entriesByDay = {};
   let monthTotal = 0;
   entries.forEach((entry) => {
     const dayNum = Number(entry.date.split("-")[2]);
-    byDay[dayNum] = (byDay[dayNum] || 0) + Number(entry.amount);
+    if (!entriesByDay[dayNum]) entriesByDay[dayNum] = [];
+    entriesByDay[dayNum].push(entry);
     monthTotal += Number(entry.amount);
   });
 
@@ -440,12 +441,24 @@ function renderCalendar() {
 
     const day = i - startOffset + 1;
     cell.className = "cal-cell";
-    const amountLabel = byDay[day]
-      ? `<span class="badge text-bg-primary cal-badge">${formatINR(byDay[day], true)}</span>`
-      : "";
+    const dayEntries = (entriesByDay[day] || []).slice().sort((a, b) => Number(b.amount) - Number(a.amount));
+    let entriesMarkup = "";
+    const maxEntries = 3;
+    dayEntries.slice(0, maxEntries).forEach((entry) => {
+      const catClass = (entry.category || "other").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      entriesMarkup += `
+        <span class="cal-entry cal-entry--${catClass}">
+          <span class="cal-entry__label">${entry.category || "Entry"}</span>
+          <span class="cal-entry__amount">${formatINR(entry.amount, true)}</span>
+        </span>
+      `;
+    });
+    if (dayEntries.length > maxEntries) {
+      entriesMarkup += `<span class="cal-entry cal-entry--more">+${dayEntries.length - maxEntries} more</span>`;
+    }
     cell.innerHTML = `
       <div class="cal-day">${day}</div>
-      ${amountLabel}
+      ${entriesMarkup ? `<div class="cal-entries">${entriesMarkup}</div>` : ""}
     `;
 
     cell.style.cursor = "pointer";
@@ -458,13 +471,36 @@ function renderCalendar() {
     : "No entries this month.";
   document.getElementById("monthTotalText").innerText = monthSummary;
 }
+
+function changeCalendarMonth(delta) {
+  if (!Number.isInteger(delta)) return;
+  const next = new Date(viewYear, viewMonth + delta, 1);
+  viewYear = next.getFullYear();
+  viewMonth = next.getMonth();
+  renderCalendar();
+  renderInsights();
+  renderMileageBreakdown();
+}
+
+const calPrevBtn = document.getElementById("calPrev");
+if (calPrevBtn) {
+  calPrevBtn.addEventListener("click", () => changeCalendarMonth(-1));
+}
+const calNextBtn = document.getElementById("calNext");
+if (calNextBtn) {
+  calNextBtn.addEventListener("click", () => changeCalendarMonth(1));
+}
+
 const dayModalTemplate = `
+<div class="modal fade" id="dayModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content day-modal">
       <div class="modal-header">
         <h5 class="modal-title" id="dayModalTitle">Day</h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" id="dayModalBody">No entries for this day.</div>
-      <div class="modal-footer">
+      <div class="modal-footer day-modal__footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -486,28 +522,84 @@ function openDayModal(year, month, day) {
     .filter((entry) => entry.date === dateStr)
     .sort((a, b) => Number(b.amount) - Number(a.amount));
 
+  const modalEl = document.getElementById("dayModal");
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
   const titleEl = document.getElementById("dayModalTitle");
   const bodyEl = document.getElementById("dayModalBody");
+  const footerEl = modalEl.querySelector(".modal-footer");
   titleEl.textContent = new Date(`${dateStr}T00:00:00`).toDateString();
 
   if (!entries.length) {
-    bodyEl.innerHTML = '<div class="text-muted">No entries for this day.</div>';
+    bodyEl.innerHTML = '<div class="text-muted text-center py-3">No entries for this day.</div>';
+    footerEl.innerHTML = '<button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>';
+    modal.show();
+    return;
   } else {
+    const dayTotal = entries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
     const items = entries
       .map((entry) => `
-        <div class="list-group-item d-flex justify-content-between align-items-start">
-          <div>
-            <div class="fw-semibold">${entry.category} - ${formatINR(entry.amount, true)}</div>
-            <div class="small text-muted">${entry.notes || ""}</div>
+        <article class="day-entry">
+          <div class="day-entry__header">
+            <div>
+              <div class="day-entry__category">${entry.category || "Entry"}</div>
+              <div class="day-entry__amount">${formatINR(entry.amount, true)}</div>
+            </div>
+            <div class="day-entry__actions">
+              <button class="btn btn-outline-primary btn-sm" data-entry-edit="${entry.id}">
+                <i class="bi bi-pencil"></i> Edit
+              </button>
+              <button class="btn btn-outline-danger btn-sm" data-entry-delete="${entry.id}">
+                <i class="bi bi-trash"></i> Delete
+              </button>
+            </div>
           </div>
-          <button class="btn btn-sm btn-outline-danger" onclick="deleteEntry('${entry.id}'); setTimeout(() => { openDayModal(${year}, ${month}, ${day}); renderCalendar(); renderInsights(); }, 80)">Delete</button>
-        </div>
+          ${
+            entry.notes
+              ? `<div class="day-entry__note">${entry.notes}</div>`
+              : ""
+          }
+          <div class="day-entry__meta">
+            ${entry.category || "Expense"}${entry.liters ? ` • ${entry.liters} L` : ""}${entry.odo ? ` • ${entry.odo} km` : ""}
+          </div>
+        </article>
       `)
       .join("");
-    bodyEl.innerHTML = `<div class="list-group">${items}</div>`;
+    bodyEl.innerHTML = `<div class="day-entry-list">${items}</div>`;
+
+    footerEl.innerHTML = `
+      <div class="day-summary">
+        <div>
+          <div class="day-summary__label">Daily total</div>
+          <div class="day-summary__value">${formatINR(dayTotal, true)}</div>
+        </div>
+        <div class="day-summary__meta">${entries.length} ${entries.length === 1 ? "entry" : "entries"}</div>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    `;
+
+    bodyEl.querySelectorAll("[data-entry-delete]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.getAttribute("data-entry-delete");
+        deleteEntry(id);
+        modal.hide();
+        setTimeout(() => {
+          renderCalendar();
+          renderInsights();
+          renderMileageBreakdown();
+          openDayModal(year, month, day);
+        }, 150);
+      });
+    });
+
+    bodyEl.querySelectorAll("[data-entry-edit]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.getAttribute("data-entry-edit");
+        modal.hide();
+        editEntry(id);
+      });
+    });
   }
 
-  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("dayModal"));
   modal.show();
 }
 

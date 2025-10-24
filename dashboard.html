@@ -1,9 +1,10 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8" />   
+  <meta name="viewport" content="width=device-width,initial-scale=1" />  
+  <meta name="description" content="Bike Expense Tracker by Harsh Pandey is an offline-first PWA that tracks fuel, services, modifications, and mileage for motorcycles with export-ready insights." />
   <title>Bike Expense Tracker &ndash; Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,11 +13,50 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="assets/css/dashboard.css">
+
+
+    <!--  SEO Meta Tags -->
+<meta name="title" content="Bike Expense Tracker | Fuel & Mileage Manager by CodeNest" />
+<meta name="description" content="Track your bike's fuel, service, and maintenance costs effortlessly. Bike Expense Tracker by CodeNest helps you log refuels, monitor mileage, and manage monthly ride expenses  all in one beautiful dashboard." />
+<meta name="keywords" content="bike expense tracker, mileage calculator, fuel log app, bike maintenance tracker, ride cost manager, CodeNest project, Harsh Pandey, fuel expense app, service log, motorcycle tracker" />
+<meta name="author" content="Harsh Pandey | Web Developer" />
+<meta name="robots" content="index, follow" />
+<meta name="language" content="English" />
+<meta name="theme-color" content="#0d6efd" />
+
+<!--  Social / Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Bike Expense Tracker | Smart Fuel & Mileage Logger" />
+<meta property="og:description" content="Keep your bikes performance and expenses under control with a modern expense tracker. Analyse mileage, view insights, and export reports easily." />
+<meta property="og:url" content="https://lucifer01430.github.io/bike-expense-tracker/" />
+<meta property="og:site_name" content="Bike Expense Tracker" />
+
+<!--  Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Bike Expense Tracker  Fuel, Service & Mileage Insights" />
+<meta name="twitter:description" content="A smart way to track your bike�s mileage, fuel logs, and maintenance costs." />
+
+<!-- Favicons -->
+<link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg" />
+<link rel="shortcut icon" href="assets/favicon/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="BET" />
+<link rel="manifest" href="assets/favicon/site.webmanifest" />
+
+  
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3W41FHSXPM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3W41FHSXPM');
+</script>
 </head>
 
-<body class="dashboard-body">
-
-  <header class="topbar">
+<body class="dashboard-body"> <header class="topbar">
     <div class="container-fluid topbar-inner">
       <div class="d-flex align-items-center gap-3">
         <div class="brand-badge">
@@ -29,7 +69,7 @@
       </div>
       <div class="header-actions">
         <button type="button" class="theme-toggle" id="dashThemeToggle" data-theme-toggle aria-pressed="false">
-          <span class="theme-icon" data-theme-icon aria-hidden="true">ðŸŒ™</span>
+          <span class="theme-icon" data-theme-icon aria-hidden="true">??</span>
           <span class="theme-toggle-text" data-theme-text>Dark mode</span>
         </button>
         <button id="logoutBtn" class="btn btn-outline-light btn-sm">
@@ -46,21 +86,21 @@
           <div class="hero-card__badge" id="welcomeBadge">Dashboard</div>
           <h2 class="hero-card__title" id="welcomeTitle">Welcome</h2>
           <p class="hero-card__subtitle" id="welcomeDesc">
-            Stay in control of every rupee you invest in your ride — fuel, service, and upgrades — all in one powerful
+            Stay in control of every rupee you invest in your ride ? fuel, service, and upgrades ? all in one powerful
             workspace.
           </p>
 
           <p class="hero-card__meta mb-2">
             <strong>Bike Expense Tracker</strong> is your personal riding companion that helps you record every refuel,
             service, and maintenance cost.
-            Whether you’re managing your daily commute or planning long trips, this app ensures you always know where
-            your money goes — and how efficiently your bike performs.
+            Whether you?re managing your daily commute or planning long trips, this app ensures you always know where
+            your money goes ? and how efficiently your bike performs.
           </p>
 
           <p class="hero-card__meta mb-3">
             Designed with simplicity and accuracy in mind, it keeps your entire expense history organized month by
             month.
-            You can visualize trends, export reports, and monitor mileage insights — all without needing an internet
+            You can visualize trends, export reports, and monitor mileage insights ? all without needing an internet
             connection.
           </p>
 
@@ -99,7 +139,7 @@
               </div>
               <div>
                 <span class="qa-card__label">This Month Spend</span>
-                <span class="qa-card__value" id="qaMonthSpend">₹0</span>
+                <span class="qa-card__value" id="qaMonthSpend">?0</span>
                 <span class="qa-card__sub" id="qaMonthEntries">Log your first entry</span>
               </div>
             </article>
@@ -515,6 +555,45 @@
     })();
   </script>
   <script src="assets/js/dashboard.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener(
+          'click',
+          (event) => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            const LOGIN_KEY = 'bikexp_logged_in';
+            localStorage.removeItem(LOGIN_KEY);
+            Swal.fire({
+              toast: true,
+              icon: 'success',
+              title: 'Logged out successfully',
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 2000,
+              timerProgressBar: true,
+            }).then(() => {
+              window.location.href = 'index.html';
+            });
+          },
+          { once: true }
+        );
+      }
+
+      ['welcomeModal', 'aboutModal', 'policyModal', 'dayModal'].forEach((id) => {
+        const modalEl = document.getElementById(id);
+        if (!modalEl) return;
+        modalEl.addEventListener('hidden.bs.modal', () => {
+          if (document.activeElement && modalEl.contains(document.activeElement)) {
+            document.activeElement.blur();
+          }
+        });
+      });
+    });
+  </script>
 </body>
 
 </html>
+
