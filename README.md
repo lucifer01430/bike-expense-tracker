@@ -14,6 +14,48 @@ This project delivers a **privacy-first, client-side experience** that enables r
 - Manage accounts entirely in-browser with hashed credentials.
 
 ---
+## 📸 App Screenshots
+
+Below are some key screens from **Bike Expense Tracker (BET)** showing the app’s smooth workflow and modern dashboard UI.
+
+---
+
+### 🏠 Home Screen  
+A clean and welcoming overview where riders can access all features quickly.
+![Home Screen](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/home.png)
+
+---
+
+### 🔐 Login Page  
+Secure login interface with modern UI and responsive layout.
+![Login Page](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/login.png)
+
+---
+
+### 📝 Signup Page  
+New users can easily register and start tracking their expenses instantly.
+![Signup Page](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/signup.png)
+
+---
+
+### 📅 Calendar Tracking  
+Visualize daily and monthly bike expenses with a smart, interactive calendar view.
+![Calendar Tracking](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/calender-tracking.png)
+
+---
+
+### 📊 Insights & Analytics  
+View spending breakdowns, mileage stats, and category-wise insights to analyze your rides better.
+![Insights Page](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/insights.png)
+
+---
+
+### 🔄 Updates & Improvements  
+Regular updates keep the app optimized and future-ready with new UI refinements and performance boosts.
+![Updates Section](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/updates.png)
+
+---
+
 
 ## ⚙️ Tech Stack
 
@@ -71,7 +113,7 @@ This project delivers a **privacy-first, client-side experience** that enables r
 ## 🚀 How to Run Locally
 
 ### 1️⃣ Clone the repository
-`ash
+`bash
 git clone https://github.com/yourusername/bike-expense-tracker.git
 cd bike-expense-tracker
 `
