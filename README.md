@@ -121,8 +121,7 @@ cd bike-expense-tracker
 ### 2️⃣ Serve the PWA locally (choose any option)
 - **VS Code Live Server** (recommended)
 - python -m http.server 8000
-- 
-px serve
+- px serve
 
 ### 3️⃣ Visit the dashboard
 Open http://localhost:8000/index.php in your browser, create a profile, and explore the dashboard. Install it as a PWA from the browser prompt for a native-like experience.
