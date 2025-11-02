@@ -31,6 +31,81 @@ function setText(target, text) {
   }
 }
 
+const FUEL_ENTRY_TYPES = ["Fuel", "CNG"];
+const FUEL_UNITS = { Fuel: "L", CNG: "kg" };
+const quantityFormatter = new Intl.NumberFormat("en-IN", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
+function isFuelCategory(category) {
+  return FUEL_ENTRY_TYPES.includes(category);
+}
+
+function getFuelUnit(category) {
+  return FUEL_UNITS[category] || "L";
+}
+
+function parseOptionalNumber(value, { allowZero = false } = {}) {
+  if (value === null || value === undefined) return null;
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
+  const num = Number(trimmed);
+  if (!Number.isFinite(num)) return null;
+  if (!allowZero && num === 0) return null;
+  return num;
+}
+
+function formatFuelQuantity(value, category) {
+  if (!isFuelCategory(category)) return null;
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return null;
+  const formatted = quantityFormatter.format(num);
+  return `${formatted} ${getFuelUnit(category)}`;
+}
+
+function formatEntryFuelQuantity(entry) {
+  if (!entry) return "-";
+  return formatFuelQuantity(entry.liters, entry.category) || "-";
+}
+
+function buildEntryMeta(entry) {
+  if (!entry) return "-";
+  const parts = [];
+  if (entry.category) parts.push(entry.category);
+  const quantity = formatFuelQuantity(entry.liters, entry.category);
+  if (quantity) parts.push(quantity);
+  if (entry.odo) parts.push(`${entry.odo} km`);
+  return parts.join(" \u2022 ") || "-";
+}
+
+function computeMileageRows(entries, category) {
+  const rows = [];
+  for (let i = 1; i < entries.length; i++) {
+    const previous = entries[i - 1];
+    const current = entries[i];
+    const prevOdo = parseOptionalNumber(previous.odo, { allowZero: true });
+    const currOdo = parseOptionalNumber(current.odo, { allowZero: true });
+    const quantityValue = parseOptionalNumber(previous.liters);
+    if (prevOdo === null || currOdo === null || quantityValue === null) continue;
+    if (currOdo <= prevOdo) continue;
+    const distance = currOdo - prevOdo;
+    if (distance <= 0) continue;
+    const avg = (distance / quantityValue).toFixed(1);
+    const quantityLabel = formatFuelQuantity(previous.liters, category);
+    if (!quantityLabel) continue;
+    rows.push(`
+        <tr>
+          <td>${formatDateLabel(previous.date, { day: "2-digit", month: "short" })} \u2013 ${formatDateLabel(current.date, { day: "2-digit", month: "short" })}</td>
+          <td>${quantityFormatter.format(distance)} km</td>
+          <td>${quantityLabel}</td>
+          <td><b>${avg}</b> km/${getFuelUnit(category)}</td>
+        </tr>
+      `);
+  }
+  return rows;
+}
+
 
 function loadUsers() {
   try {
@@ -63,7 +138,7 @@ function findUser(username) {
   setText("welcomeTitle", `Welcome, ${user.displayName}`);
   setText(
     "welcomeDesc",
-    "Stay in control of every rupee you invest in your ride - fuel, service, and upgrades all in one workspace."
+    "Stay in control of every rupee you invest in your vehicle - fuel, service, and upgrades all in one workspace."
   );
   const joinLabel = formatDateLabel(user.createdAt, { month: "short", year: "numeric" });
   setText("welcomeBadge", joinLabel ? `Member since ${joinLabel}` : "Member");
@@ -233,7 +308,7 @@ function updateQuickActionsPanel() {
       else if (diffDays > 1) message = `Last logged expense was ${diffDays} days ago.`;
       quickNoteEl.textContent = message;
     } else {
-      quickNoteEl.textContent = "Start logging your first ride expense to see insights here.";
+      quickNoteEl.textContent = "Start logging your first vehicle expense to see insights here.";
     }
   }
 
@@ -263,7 +338,7 @@ function renderEntries() {
       <td>${entry.date}</td>
       <td>${entry.category}</td>
       <td>${formatMoney(amount)}</td>
-      <td>${entry.liters ? `${entry.liters} L` : "-"}</td>
+      <td>${formatEntryFuelQuantity(entry)}</td>
       <td>${entry.odo ? `${entry.odo} km` : "-"}</td>
       <td>${entry.notes?.trim() || "-"}</td>
       <td>
@@ -296,8 +371,10 @@ document.getElementById("addExpenseForm").addEventListener("submit", (e) => {
   const cat = document.getElementById("expCategory").value;
   const amt = Number(document.getElementById("expAmount").value);
   const notes = document.getElementById("expNotes").value.trim();
-  const liters = Number(document.getElementById("expLiters")?.value) || null;
-  const odo = Number(document.getElementById("expOdo")?.value) || null;
+  const quantityInput = document.getElementById("expLiters");
+  const odoInput = document.getElementById("expOdo");
+  const liters = isFuelCategory(cat) ? parseOptionalNumber(quantityInput?.value) : null;
+  const odo = isFuelCategory(cat) ? parseOptionalNumber(odoInput?.value) : null;
   const editId = document.getElementById("editId").value;
 
   if (!date || !cat || amt <= 0)
@@ -355,10 +432,10 @@ function editEntry(id) {
 
   // fill fuel fields if exist
   if (document.getElementById("expLiters")) {
-    document.getElementById("expLiters").value = e.liters || "";
+    document.getElementById("expLiters").value = e.liters ?? "";
   }
   if (document.getElementById("expOdo")) {
-    document.getElementById("expOdo").value = e.odo || "";
+    document.getElementById("expOdo").value = e.odo ?? "";
   }
 
   toggleFuelFields(); // show/hide fields properly
@@ -537,7 +614,8 @@ function openDayModal(year, month, day) {
   } else {
     const dayTotal = entries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
     const items = entries
-      .map((entry) => `
+      .map(
+        (entry) => `
         <article class="day-entry">
           <div class="day-entry__header">
             <div>
@@ -559,10 +637,11 @@ function openDayModal(year, month, day) {
               : ""
           }
           <div class="day-entry__meta">
-            ${entry.category || "Expense"}${entry.liters ? ` • ${entry.liters} L` : ""}${entry.odo ? ` • ${entry.odo} km` : ""}
+            ${buildEntryMeta(entry)}
           </div>
         </article>
-      `)
+      `
+      )
       .join("");
     bodyEl.innerHTML = `<div class="day-entry-list">${items}</div>`;
 
@@ -607,7 +686,7 @@ function openDayModal(year, month, day) {
 let catChart;
 function computeMonthStats() {
   const list = getMonthEntries(viewYear, viewMonth);
-  const totals = { Fuel: 0, Service: 0, Modification: 0, Other: 0 };
+  const totals = { Fuel: 0, CNG: 0, Service: 0, Modification: 0, Other: 0 };
   const dayTotals = {};
   let maxDay = null;
   let total = 0;
@@ -624,15 +703,11 @@ function computeMonthStats() {
     maxDay = { day: Number(day), amount: Number(amount) };
   }
 
-  return { totals, total, maxDay, count: list.length };
+  return { totals, total, maxDay, count: list.length, list };
 }
 
 function renderInsights() {
   const stats = computeMonthStats();
-  const fuels = getMonthEntries(viewYear, viewMonth)
-    .filter((entry) => entry.category === 'Fuel')
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
-
   const summaryParts = [];
   if (stats.count) {
     summaryParts.push(`Total ${formatINR(stats.total, true)}`);
@@ -644,21 +719,29 @@ function renderInsights() {
     summaryParts.push('No entries this month.');
   }
 
-  let avgMileage = null;
-  if (fuels.length >= 2) {
+  const mileageBadges = [];
+  const monthEntries = stats.list || [];
+  FUEL_ENTRY_TYPES.forEach((fuelCategory) => {
+    const fuels = monthEntries
+      .filter((entry) => entry.category === fuelCategory)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (fuels.length < 2) return;
     const first = fuels[0];
     const last = fuels[fuels.length - 1];
     const distance = (Number(last.odo) || 0) - (Number(first.odo) || 0);
-    const fuelUsed = fuels.slice(1).reduce((sum, entry) => sum + (Number(entry.liters) || 0), 0);
-    if (distance > 0 && fuelUsed > 0) {
-      avgMileage = (distance / fuelUsed).toFixed(1);
+    const quantityUsed = fuels.slice(1).reduce((sum, entry) => sum + (Number(entry.liters) || 0), 0);
+    if (distance > 0 && quantityUsed > 0) {
+      const avgMileage = (distance / quantityUsed).toFixed(1);
+      mileageBadges.push(
+        `<span class="badge rounded-pill bg-success ms-2 px-3 py-2 shadow-sm">Avg mileage (${fuelCategory}): <strong>${avgMileage}</strong> km/${getFuelUnit(fuelCategory)}</span>`
+      );
     }
-  }
+  });
 
   const insightsSummary = document.getElementById('insightsSummary');
   insightsSummary.innerHTML = `
     <span>${summaryParts.join(' \u2022 ')}</span>
-    ${avgMileage ? `<span class="badge rounded-pill bg-success ms-2 px-3 py-2 shadow-sm">Avg mileage: <strong>${avgMileage}</strong> km/l</span>` : ''}
+    ${mileageBadges.join('')}
   `;
 
   const labels = Object.keys(stats.totals);
@@ -702,53 +785,87 @@ function renderInsights() {
 function toggleFuelFields() {
   const categorySelect = document.getElementById("expCategory");
   if (!categorySelect) return;
-  const isFuel = categorySelect.value === "Fuel";
+  const category = categorySelect.value;
+  const showFields = isFuelCategory(category);
   document.querySelectorAll(".fuel-fields").forEach((el) => {
-    el.classList.toggle("d-none", !isFuel);
+    el.classList.toggle("d-none", !showFields);
   });
+  const label = document.getElementById("expLitersLabel");
+  const quantityInput = document.getElementById("expLiters");
+  if (label) {
+    if (showFields) {
+      label.textContent = `${category} Quantity (${getFuelUnit(category)})`;
+    } else {
+      label.textContent = "Fuel Quantity (L)";
+    }
+  }
+  if (quantityInput) {
+    if (showFields) {
+      quantityInput.placeholder = getFuelUnit(category) === "kg" ? "e.g. 3.2" : "e.g. 5.6";
+    } else {
+      quantityInput.placeholder = "e.g. 5.6";
+      quantityInput.value = "";
+    }
+  }
+  if (!showFields) {
+    const odoInput = document.getElementById("expOdo");
+    if (odoInput) {
+      odoInput.value = "";
+    }
+  }
 }
 
 function renderMileageBreakdown() {
-  const fuels = getMonthEntries(viewYear, viewMonth)
-    .filter((entry) => entry.category === "Fuel")
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
-
   const wrap = document.getElementById("mileageTableWrap");
-  if (fuels.length < 2) {
-    wrap.innerHTML = `<div class="text-muted">Not enough fuel entries to calculate.</div>`;
+  if (!wrap) return;
+  const monthEntries = getMonthEntries(viewYear, viewMonth);
+  const sections = [];
+  let hasFuelEntries = false;
+  let hasMileageRows = false;
+
+  FUEL_ENTRY_TYPES.forEach((fuelCategory) => {
+    const fuels = monthEntries
+      .filter((entry) => entry.category === fuelCategory)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (!fuels.length) return;
+    hasFuelEntries = true;
+    const rows = computeMileageRows(fuels, fuelCategory);
+    const header = `<div class="fw-semibold text-body mb-2">${fuelCategory}</div>`;
+    if (!rows.length) {
+      const message =
+        fuels.length < 2
+          ? `Add at least two ${fuelCategory.toLowerCase()} entries with odometer data to calculate mileage.`
+          : "No valid odometer data found.";
+      sections.push(`<div class="mb-3">${header}<div class="text-muted">${message}</div></div>`);
+      return;
+    }
+    hasMileageRows = true;
+    const unit = getFuelUnit(fuelCategory);
+    sections.push(`
+      <div class="mb-4">
+        ${header}
+        <table class="table table-sm table-bordered align-middle">
+          <thead class="table-light">
+            <tr><th>Duration</th><th>Distance</th><th>Quantity Used (${unit})</th><th>Average</th></tr>
+          </thead>
+          <tbody>${rows.join("")}</tbody>
+        </table>
+      </div>
+    `);
+  });
+
+  if (!hasFuelEntries) {
+    wrap.innerHTML = `<div class="text-muted">No mileage data yet.</div>`;
     return;
   }
 
-  const rows = [];
-  for (let i = 1; i < fuels.length; i++) {
-    const previous = fuels[i - 1];
-    const current = fuels[i];
-
-    const prevOdo = Number(previous.odo) || 0;
-    const currOdo = Number(current.odo) || 0;
-    const liters = Number(previous.liters) || 0;
-    if (currOdo > prevOdo && liters > 0) {
-      const distance = currOdo - prevOdo;
-      const avg = (distance / liters).toFixed(1);
-      rows.push(`
-        <tr>
-          <td>${formatDateLabel(previous.date, { day: "2-digit", month: "short" })} \u2013 ${formatDateLabel(current.date, { day: "2-digit", month: "short" })}</td>
-          <td>${distance} km</td>
-          <td>${liters.toFixed(2)} L</td>
-          <td><b>${avg}</b> km/l</td>
-        </tr>
-      `);
-    }
+  if (!hasMileageRows) {
+    wrap.innerHTML =
+      sections.join("") || `<div class="text-muted">Add odometer readings to calculate mileage.</div>`;
+    return;
   }
 
-  wrap.innerHTML = rows.length
-    ? `<table class="table table-sm table-bordered align-middle">
-        <thead class="table-light">
-          <tr><th>Duration</th><th>Distance</th><th>Fuel Used</th><th>Average</th></tr>
-        </thead>
-        <tbody>${rows.join("")}</tbody>
-      </table>`
-    : `<div class="text-muted">No valid odometer data found.</div>`;
+  wrap.innerHTML = sections.join("");
 }
 
 
@@ -824,7 +941,7 @@ function drawFilteredList(list) {
       <td>${entry.date}</td>
       <td>${entry.category}</td>
       <td>${formatINR(amount, true)}</td>
-      <td>${entry.liters ? entry.liters : "-"}</td>
+      <td>${formatEntryFuelQuantity(entry)}</td>
       <td>${entry.odo ? entry.odo : "-"}</td>
       <td>${entry.notes || "-"}</td>
       <td>
@@ -917,11 +1034,23 @@ async function exportPDF() {
   currentY += 20;
 
   // Function to add new page if needed
-  function newPageIfNeeded() {
-    if (currentY > pageHeight - 50) {
+  function newPageIfNeeded(blockHeight = 0) {
+    if (currentY + blockHeight >= pageHeight) {
       doc.addPage();
       currentY = 40;
     }
+  }
+
+  function getScaledDimensions(canvas, targetWidth = 500) {
+    const maxHeight = pageHeight - 80;
+    let width = Math.min(targetWidth, pageWidth - 40);
+    let height = (canvas.height * width) / canvas.width;
+    if (height > maxHeight) {
+      const scale = maxHeight / height;
+      height = maxHeight;
+      width *= scale;
+    }
+    return { width, height };
   }
 
   // --- Calendar Section ---
@@ -961,9 +1090,8 @@ async function exportPDF() {
     width: 780,
   });
   const calImgData = calCanvas.toDataURL("image/png");
-  const calImgWidth = 500;
-  const calImgHeight = (calCanvas.height * calImgWidth) / calCanvas.width;
-  newPageIfNeeded();
+  const { width: calImgWidth, height: calImgHeight } = getScaledDimensions(calCanvas);
+  newPageIfNeeded(calImgHeight);
   doc.addImage(calImgData, "PNG", 40, currentY, calImgWidth, calImgHeight);
   currentY += calImgHeight + 20;
   document.body.removeChild(tempCal);
@@ -1003,9 +1131,8 @@ async function exportPDF() {
       width: 780,
     });
     const tableImgData = tableCanvas.toDataURL("image/png");
-    const tableImgWidth = 500;
-    const tableImgHeight = (tableCanvas.height * tableImgWidth) / tableCanvas.width;
-    newPageIfNeeded();
+    const { width: tableImgWidth, height: tableImgHeight } = getScaledDimensions(tableCanvas);
+    newPageIfNeeded(tableImgHeight);
     doc.addImage(tableImgData, "PNG", 40, currentY, tableImgWidth, tableImgHeight);
     currentY += tableImgHeight + 20;
     document.body.removeChild(tempTable);
@@ -1068,9 +1195,8 @@ async function exportPDF() {
     width: 780,
   });
   const insightsImgData = insightsCanvas.toDataURL("image/png");
-  const insightsImgWidth = 500;
-  const insightsImgHeight = (insightsCanvas.height * insightsImgWidth) / insightsCanvas.width;
-  newPageIfNeeded();
+  const { width: insightsImgWidth, height: insightsImgHeight } = getScaledDimensions(insightsCanvas);
+  newPageIfNeeded(insightsImgHeight);
   doc.addImage(insightsImgData, "PNG", 40, currentY, insightsImgWidth, insightsImgHeight);
   currentY += insightsImgHeight + 20;
   document.body.removeChild(tempInsights);
@@ -1090,3 +1216,4 @@ async function exportPDF() {
   const dateStr = new Date().toISOString().slice(0, 10);
   doc.save(`BikeXP_Report_${dateStr}.pdf`);
 }
+
