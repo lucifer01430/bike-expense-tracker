@@ -19,43 +19,30 @@ This project delivers a **privacy-first, client-side experience** that enables r
 Below are some key screens from **Bike Expense Tracker (BET)** showing the app’s smooth workflow and modern dashboard UI.
 
 ---
-
-### 🏠 Home Screen  
-A clean and welcoming overview where riders can access all features quickly.
-![Home Screen](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/home.png)
-
----
-
-### 🔐 Login Page  
-Secure login interface with modern UI and responsive layout.
-![Login Page](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/login.png)
+### 🏠 Home Screen
+<div align="center">
+  <img src="https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/home.png" alt="Home Screen" width="440">
+</div>
 
 ---
 
-### 📝 Signup Page  
-New users can easily register and start tracking their expenses instantly.
-![Signup Page](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/signup.png)
+### 🔐 Authentication
+<div align="center">
+  <img src="https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/login.png" alt="Login Page" width="240">
+  <img src="https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/signup.png" alt="Signup Page" width="230">
+</div>
 
 ---
 
-### 📅 Calendar Tracking  
-Visualize daily and monthly bike expenses with a smart, interactive calendar view.
-![Calendar Tracking](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/calender-tracking.png)
+### 📅 Tracking & Management
+<div align="center">
+  <img src="https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/calender-tracking.png" alt="Calendar Tracking" width="260">
+  <img src="https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/insights.png" alt="Insights Page" width="240">
+    <img src="https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/updates.png" alt="Updates Section" width="400">
+</div>
+
 
 ---
-
-### 📊 Insights & Analytics  
-View spending breakdowns, mileage stats, and category-wise insights to analyze your rides better.
-![Insights Page](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/insights.png)
-
----
-
-### 🔄 Updates & Improvements  
-Regular updates keep the app optimized and future-ready with new UI refinements and performance boosts.
-![Updates Section](https://raw.githubusercontent.com/lucifer01430/bike-expense-tracker/refs/heads/main/assets/screenshots/updates.png)
-
----
-
 
 ## ⚙️ Tech Stack
 
